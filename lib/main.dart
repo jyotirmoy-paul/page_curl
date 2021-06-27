@@ -19,22 +19,21 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.red[100],
         // appBar: AppBar(title: Text("Curl Page")),
-        body: Center(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: CurlPage(
-              size: MediaQuery.of(context).size,
-              front: Container(
-                alignment: Alignment.center,
-                color: Colors.teal,
-                child: Text(
-                  "This is my cool sentence",
-                  style: TextStyle(color: Colors.white),
-                ),
+        body: Container(
+          height: 200,
+          width: 100,
+          child: CurlPage(
+            size: Size(100, 200),
+            front: Container(
+              alignment: Alignment.center,
+              color: Colors.teal,
+              child: Text(
+                "This is my cool sentence",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
               ),
-              back: Text('This is a pretty large hidden text, out there' * 20),
             ),
+            back: Text('This is a pretty large hidden text, out there' * 20),
           ),
         ),
       );

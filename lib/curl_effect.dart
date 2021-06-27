@@ -117,8 +117,9 @@ class _CurlEffectState extends State<CurlEffect> {
     mA.x = width - (bh / _cos);
     mA.y = height.toDouble();
 
-    mD.y = height - (bh / _sin);
     mD.x = width.toDouble();
+    // bound mD.y
+    mD.y = math.min(height - (bh / _sin), getHeight());
 
     mA.x = math.max(0, mA.x);
     if (mA.x == 0) {
@@ -261,13 +262,13 @@ class _CurlEffectState extends State<CurlEffect> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onVerticalDragEnd: (_) {
+      onHorizontalDragEnd: (_) {
         handleTouchInput(TouchEvent(TouchEventType.END, null));
       },
-      onVerticalDragStart: (DragStartDetails dsd) {
+      onHorizontalDragStart: (DragStartDetails dsd) {
         handleTouchInput(TouchEvent(TouchEventType.START, dsd.localPosition));
       },
-      onVerticalDragUpdate: (DragUpdateDetails dud) {
+      onHorizontalDragUpdate: (DragUpdateDetails dud) {
         handleTouchInput(
           TouchEvent(TouchEventType.MOVE, dud.localPosition),
         );
