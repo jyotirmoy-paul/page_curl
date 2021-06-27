@@ -52,7 +52,11 @@ class _CurlPageState extends State<CurlPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_image != null) return CurlEffect(image: _image);
+    if (_image != null)
+      return CurlEffect(
+        image: _image,
+        size: MediaQuery.of(context).size,
+      );
 
     WidgetsBinding.instance.addPostFrameCallback(_captureImage);
 

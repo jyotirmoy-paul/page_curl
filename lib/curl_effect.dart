@@ -6,9 +6,11 @@ import 'dart:math' as math;
 
 class CurlEffect extends StatefulWidget {
   final ui.Image image;
+  final Size size;
 
   CurlEffect({
-    this.image,
+    @required this.image,
+    @required this.size,
   });
 
   @override
@@ -136,9 +138,9 @@ class _CurlEffectState extends State<CurlEffect> {
     }
   }
 
-  double getWidth() => widget.image.height.toDouble();
+  double getWidth() => widget.size.width;
 
-  double getHeight() => widget.image.width.toDouble();
+  double getHeight() => widget.size.height;
 
   void resetClipEdge() {
     // set base movement
@@ -148,8 +150,8 @@ class _CurlEffectState extends State<CurlEffect> {
     mOldMovement.y = 0;
 
     mA = new Vector2D(0, 0);
-    mB = new Vector2D(this.getWidth(), this.getHeight());
-    mC = new Vector2D(this.getWidth(), 0);
+    mB = new Vector2D(getWidth(), getHeight());
+    mC = new Vector2D(getWidth(), 0);
     mD = new Vector2D(0, 0);
     mE = new Vector2D(0, 0);
     mF = new Vector2D(0, 0);
@@ -166,7 +168,7 @@ class _CurlEffectState extends State<CurlEffect> {
     bBlockTouchInput = true;
 
     double curlSpeed = mCurlSpeed.toDouble();
-    if (!bFlipRight) curlSpeed *= -1;
+    curlSpeed *= -1;
 
     mMovement.x += curlSpeed;
     mMovement = capMovement(mMovement, false);
@@ -179,16 +181,17 @@ class _CurlEffectState extends State<CurlEffect> {
     bFlipping = false;
     bEnableInputAfterDraw = true;
 
-    // TODO: how to force a new draw?
     setState(() {});
   }
 
   void handleTouchInput(TouchEvent touchEvent) {
     if (bBlockTouchInput) return;
 
-    // get finger position
-    mFinger.x = touchEvent.getX();
-    mFinger.y = touchEvent.getY();
+    if (touchEvent.getEvent() != TouchEventType.END) {
+      // get finger position if NOT TouchEventType.END
+      mFinger.x = touchEvent.getX();
+      mFinger.y = touchEvent.getY();
+    }
 
     switch (touchEvent.getEvent()) {
       case TouchEventType.END:
@@ -217,10 +220,41 @@ class _CurlEffectState extends State<CurlEffect> {
 
         doPageCurl();
 
-        // TODO: how to force a new draw?
         setState(() {});
         break;
     }
+  }
+
+  void init() {
+    // init main variables
+
+    mMovement = Vector2D(0, 0);
+    mFinger = Vector2D(0, 0);
+    mOldMovement = Vector2D(0, 0);
+
+    // create the edge paint
+    curlEdgePaint = Paint();
+    curlEdgePaint.isAntiAlias = true;
+    curlEdgePaint.color = Colors.red;
+    curlEdgePaint.style = PaintingStyle.fill;
+
+    // TODO: HOW TO APPLY SHADOW?
+    // curlEdgePaint.setShadowLayer(50, 0, 0, 0xFF000000);
+
+    mUpdateRate = 1;
+    mInitialEdgeOffset = 0;
+
+    // other initializations
+    mFlipRadius = getWidth();
+
+    resetClipEdge();
+    doPageCurl();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    init();
   }
 
   @override
@@ -241,6 +275,13 @@ class _CurlEffectState extends State<CurlEffect> {
       child: CustomPaint(
         painter: CurlPagePainter(
           image: widget.image,
+          mA: mA,
+          mB: mB,
+          mC: mC,
+          mD: mD,
+          mE: mE,
+          mF: mF,
+          mCurlEdgePaint: curlEdgePaint,
         ),
       ),
     );
@@ -249,16 +290,69 @@ class _CurlEffectState extends State<CurlEffect> {
 
 class CurlPagePainter extends CustomPainter {
   ui.Image image;
+  Vector2D mA, mB, mC, mD, mE, mF;
+  Paint mCurlEdgePaint;
+
+  final Paint _paint = Paint();
 
   CurlPagePainter({
     @required this.image,
+    @required this.mA,
+    @required this.mB,
+    @required this.mC,
+    @required this.mD,
+    @required this.mE,
+    @required this.mF,
+    @required this.mCurlEdgePaint,
   });
+
+  void drawForeground(Canvas canvas) {
+    canvas.drawImage(image, Offset.zero, _paint);
+  }
+
+  Path createBackgroundPath() {
+    Path path = new Path();
+    path.moveTo(mA.x, mA.y);
+    path.lineTo(mB.x, mB.y);
+    path.lineTo(mC.x, mC.y);
+    path.lineTo(mD.x, mD.y);
+    path.lineTo(mA.x, mA.y);
+
+    return path;
+  }
+
+  void drawBackground(Canvas canvas) {
+    Path mask = createBackgroundPath();
+
+    canvas.save();
+    canvas.clipPath(mask);
+    canvas.drawColor(Color(0xffff0000), BlendMode.clear);
+    canvas.restore();
+  }
+
+  Path createCurlEdgePath() {
+    Path path = new Path();
+    path.moveTo(mA.x, mA.y);
+    path.lineTo(mD.x, mD.y);
+    path.lineTo(mE.x, mE.y);
+    path.lineTo(mF.x, mF.y);
+    path.lineTo(mA.x, mA.y);
+
+    return path;
+  }
+
+  void drawCurlEdge(Canvas canvas) {
+    Path path = createCurlEdgePath();
+
+    canvas.clipPath(path);
+    canvas.drawPaint(mCurlEdgePaint);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ip = Paint();
-
-    canvas.drawImage(image, Offset.zero, ip);
+    drawForeground(canvas);
+    drawBackground(canvas);
+    drawCurlEdge(canvas);
   }
 
   @override
