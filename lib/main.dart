@@ -18,12 +18,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.red[100],
-        // appBar: AppBar(title: Text("Curl Page")),
-        body: Container(
-          height: 200,
-          width: 100,
+        body: Center(
           child: CurlPage(
-            size: Size(100, 200),
+            size: Size(300, 300),
             front: Container(
               alignment: Alignment.center,
               color: Colors.teal,

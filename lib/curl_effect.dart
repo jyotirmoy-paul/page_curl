@@ -131,10 +131,11 @@ class _CurlEffectState extends State<CurlEffect> {
     mE.x = mD.x;
     mE.y = mD.y;
 
-    // Correct
+    // bouding corrections
     if (mD.y < 0) {
       mD.x = width + tangAlpha * mD.y;
-      mE.y = 0;
+      // TODO: THIS IS A WRONG Y VALUE
+      mE.y = -abs(mF.y - getHeight());
       mE.x = width + math.tan(2 * alpha) * mD.y;
     }
   }
@@ -316,7 +317,7 @@ class CurlPagePainter extends CustomPainter {
     path.moveTo(mA.x, mA.y);
     path.lineTo(mB.x, mB.y);
     path.lineTo(mC.x, mC.y);
-    path.lineTo(mD.x, mD.y);
+    path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mA.x, mA.y);
 
     return path;
@@ -334,8 +335,9 @@ class CurlPagePainter extends CustomPainter {
   Path createCurlEdgePath() {
     Path path = new Path();
     path.moveTo(mA.x, mA.y);
-    path.lineTo(mD.x, mD.y);
+    path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mE.x, mE.y);
+    print("mE: $mE");
     path.lineTo(mF.x, mF.y);
     path.lineTo(mA.x, mA.y);
 

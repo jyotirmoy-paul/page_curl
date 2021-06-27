@@ -40,9 +40,13 @@ class _CurlPageState extends State<CurlPage> {
   @override
   Widget build(BuildContext context) {
     if (_image != null)
-      return CurlEffect(
-        image: _image,
-        size: widget.size,
+      return SizedBox(
+        width: widget.size.width,
+        height: widget.size.height,
+        child: CurlEffect(
+          image: _image,
+          size: widget.size,
+        ),
       );
 
     WidgetsBinding.instance.addPostFrameCallback(_captureImage);
