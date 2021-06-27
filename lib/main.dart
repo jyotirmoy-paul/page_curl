@@ -21,6 +21,7 @@ void main() {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Colors.red[100],
         appBar: AppBar(title: Text("Curl Page")),
         body: Center(
           child: Container(

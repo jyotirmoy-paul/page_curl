@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:curl_page/model/touch_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
@@ -16,19 +19,11 @@ class CurlPage extends StatefulWidget {
 }
 
 class _CurlPageState extends State<CurlPage> {
+  final StreamController<TouchEvent> _touchEventController = StreamController();
   final _boundaryKey = GlobalKey();
-
   ui.Image _image;
 
-  // @override
-  // void didUpdateWidget(CurlPage oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   if (oldWidget.front != widget.front) {
-  //     _image = null;
-  //   }
-  // }
-
-  void init() {}
+  Stream<TouchEvent> _touchEventStream;
 
   void _captureImage(Duration _) async {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -45,15 +40,41 @@ class _CurlPageState extends State<CurlPage> {
   @override
   void initState() {
     super.initState();
-    init();
+    _touchEventStream = _touchEventController.stream;
+  }
+
+  @override
+  void dispose() {
+    _touchEventController.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_image != null)
-      return CustomPaint(
-        painter: CurlPagePainter(
-          image: _image,
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragEnd: (_) {
+          _touchEventController.add(TouchEvent(TouchEventType.END, null));
+        },
+        onVerticalDragStart: (DragStartDetails dsd) {
+          _touchEventController
+              .add(TouchEvent(TouchEventType.START, dsd.localPosition));
+        },
+        onVerticalDragUpdate: (DragUpdateDetails dud) {
+          _touchEventController.add(
+            TouchEvent(TouchEventType.MOVE, dud.localPosition),
+          );
+        },
+        child: StreamBuilder<TouchEvent>(
+          stream: _touchEventStream,
+          initialData: TouchEvent.empty(),
+          builder: (_, tes) => CustomPaint(
+            painter: CurlPagePainter(
+              touchEvent: tes.data,
+              image: _image,
+            ),
+          ),
         ),
       );
 
@@ -73,14 +94,18 @@ class _CurlPageState extends State<CurlPage> {
 
 class CurlPagePainter extends CustomPainter {
   ui.Image image;
+  TouchEvent touchEvent;
 
   CurlPagePainter({
-    this.image,
+    @required this.image,
+    @required this.touchEvent,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final ip = Paint();
+
+    print('touchEvent: ${touchEvent.getEvent()}');
 
     canvas.drawImage(image, Offset.zero, ip);
   }
