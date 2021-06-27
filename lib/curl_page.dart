@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:curl_page/curl_effect.dart';
 import 'package:curl_page/model/touch_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -51,34 +52,10 @@ class _CurlPageState extends State<CurlPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_image != null)
-      return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onVerticalDragEnd: (_) {
-          _touchEventController.add(TouchEvent(TouchEventType.END, null));
-        },
-        onVerticalDragStart: (DragStartDetails dsd) {
-          _touchEventController
-              .add(TouchEvent(TouchEventType.START, dsd.localPosition));
-        },
-        onVerticalDragUpdate: (DragUpdateDetails dud) {
-          _touchEventController.add(
-            TouchEvent(TouchEventType.MOVE, dud.localPosition),
-          );
-        },
-        child: StreamBuilder<TouchEvent>(
-          stream: _touchEventStream,
-          initialData: TouchEvent.empty(),
-          builder: (_, tes) => CustomPaint(
-            painter: CurlPagePainter(
-              touchEvent: tes.data,
-              image: _image,
-            ),
-          ),
-        ),
-      );
+    if (_image != null) return CurlEffect(image: _image);
 
     WidgetsBinding.instance.addPostFrameCallback(_captureImage);
+
     return LayoutBuilder(
       builder: (context, constraints) => SizedBox(
         width: constraints.biggest.width,
@@ -89,29 +66,5 @@ class _CurlPageState extends State<CurlPage> {
         ),
       ),
     );
-  }
-}
-
-class CurlPagePainter extends CustomPainter {
-  ui.Image image;
-  TouchEvent touchEvent;
-
-  CurlPagePainter({
-    @required this.image,
-    @required this.touchEvent,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final ip = Paint();
-
-    print('touchEvent: ${touchEvent.getEvent()}');
-
-    canvas.drawImage(image, Offset.zero, ip);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }

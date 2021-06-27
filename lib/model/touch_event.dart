@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
-enum TouchEventType { END, START, MOVE, NO }
+enum TouchEventType { END, START, MOVE }
 
 class TouchEvent {
   TouchEventType _eventType;
   Offset _localOffset;
 
   TouchEvent(this._eventType, this._localOffset);
-
-  TouchEvent.empty() {
-    this._eventType = TouchEventType.NO;
-  }
 
   TouchEventType getEvent() => _eventType;
 
