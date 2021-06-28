@@ -5,11 +5,13 @@ import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 class CurlEffect extends StatefulWidget {
-  final ui.Image image;
+  final ui.Image frontImage;
+  final ui.Image backImage;
   final Size size;
 
   CurlEffect({
-    @required this.image,
+    @required this.frontImage,
+    @required this.backImage,
     @required this.size,
   });
 
@@ -134,9 +136,14 @@ class _CurlEffectState extends State<CurlEffect> {
     // bouding corrections
     if (mD.y < 0) {
       mD.x = width + tangAlpha * mD.y;
-      // TODO: THIS IS A WRONG Y VALUE
-      mE.y = -abs(mF.y - getHeight());
+
       mE.x = width + math.tan(2 * alpha) * mD.y;
+
+      // modify mD to create newmD by cleaning y value
+      Vector2D newmD = Vector2D(mD.x, 0);
+      double l = width - newmD.x;
+
+      mE.y = -math.sqrt(abs(math.pow(l, 2) - math.pow((newmD.x - mE.x), 2)));
     }
   }
 
@@ -201,14 +208,16 @@ class _CurlEffectState extends State<CurlEffect> {
         bFlipping = true;
         resetMovement();
         break;
+
       case TouchEventType.START:
         mOldMovement.x = mFinger.x;
         mOldMovement.y = mFinger.y;
         break;
+
       case TouchEventType.MOVE:
         bUserMoves = true;
 
-        // Get movement
+        // get movement
         mMovement.x -= mFinger.x - mOldMovement.x;
         mMovement.y -= mFinger.y - mOldMovement.y;
         mMovement = capMovement(mMovement, true);
@@ -244,9 +253,6 @@ class _CurlEffectState extends State<CurlEffect> {
     curlEdgePaint.color = Colors.red;
     curlEdgePaint.style = PaintingStyle.fill;
 
-    // TODO: HOW TO APPLY SHADOW?
-    // curlEdgePaint.setShadowLayer(50, 0, 0, 0xFF000000);
-
     mUpdateRate = 1;
     mInitialEdgeOffset = 0;
 
@@ -279,11 +285,12 @@ class _CurlEffectState extends State<CurlEffect> {
         );
       },
       child: ClipPath(
-        clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE),
+        clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE, mF: mF),
         clipBehavior: Clip.antiAlias,
         child: CustomPaint(
           painter: CurlPagePainter(
-            image: widget.image,
+            frontImage: widget.frontImage,
+            backImage: widget.backImage,
             mA: mA,
             mD: mD,
             mE: mE,
@@ -297,12 +304,13 @@ class _CurlEffectState extends State<CurlEffect> {
 }
 
 class CurlBackgroundClipper extends CustomClipper<Path> {
-  final Vector2D mA, mD, mE;
+  final Vector2D mA, mD, mE, mF;
 
   CurlBackgroundClipper({
     @required this.mA,
     @required this.mD,
     @required this.mE,
+    @required this.mF,
   });
 
   Path createBackgroundPath(Size size) {
@@ -316,6 +324,7 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
     path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mA.x, mA.y);
     path.lineTo(0, size.height);
+    if (mF.x < 0) path.lineTo(mF.x, mF.y);
     path.lineTo(0, 0);
 
     return path;
@@ -333,14 +342,16 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
 }
 
 class CurlPagePainter extends CustomPainter {
-  ui.Image image;
+  ui.Image frontImage;
+  ui.Image backImage;
   Vector2D mA, mD, mE, mF;
   Paint mCurlEdgePaint;
 
   final Paint _paint = Paint();
 
   CurlPagePainter({
-    @required this.image,
+    @required this.frontImage,
+    @required this.backImage,
     @required this.mA,
     @required this.mD,
     @required this.mE,
@@ -349,7 +360,7 @@ class CurlPagePainter extends CustomPainter {
   });
 
   void drawForeground(Canvas canvas) {
-    canvas.drawImage(image, Offset.zero, _paint);
+    canvas.drawImage(frontImage, Offset.zero, _paint);
   }
 
   Path createCurlEdgePath() {
@@ -389,6 +400,10 @@ class CurlPagePainter extends CustomPainter {
     }
 
     canvas.clipPath(path);
+
+    // canvas.drawImage(backImage, Offset.zero, mCurlEdgePaint);
+
+    // canvas.drawPicture()
     canvas.drawPaint(mCurlEdgePaint);
   }
 

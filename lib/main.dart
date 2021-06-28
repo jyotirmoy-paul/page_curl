@@ -14,6 +14,16 @@ void main() {
   );
 }
 
+Widget _buildChild(String text, {Color color = Colors.teal}) => Container(
+      alignment: Alignment.center,
+      color: color,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -21,16 +31,8 @@ class HomePage extends StatelessWidget {
         body: Center(
           child: CurlPage(
             size: Size(300, 300),
-            front: Container(
-              alignment: Alignment.center,
-              color: Colors.teal,
-              child: Text(
-                "This is my cool sentence",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            back: Text('This is a pretty large hidden text, out there' * 20),
+            front: _buildChild('I am the FRONT'),
+            back: _buildChild('I am the BACK', color: Colors.blueGrey),
           ),
         ),
       );

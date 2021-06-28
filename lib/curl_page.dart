@@ -22,39 +22,62 @@ class CurlPage extends StatefulWidget {
 
 class _CurlPageState extends State<CurlPage> {
   final _bKey = GlobalKey();
-  ui.Image _image;
+  ui.Image _frontImage;
+  ui.Image _backImage;
 
   void _captureImage(Duration _) async {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final b = _bKey.currentContext.findRenderObject() as RenderRepaintBoundary;
+
     if (b.debugNeedsPaint) {
       await Future.delayed(const Duration(milliseconds: 20));
       return _captureImage(_);
     }
 
     final image = await b.toImage(pixelRatio: pixelRatio);
-    setState(() => _image = image);
+
+    if (_backImage == null)
+      setState(() => _backImage = image);
+    else
+      setState(() => _frontImage = image);
+  }
+
+  Widget _buildWidget(Widget child) => SizedBox(
+        width: widget.size.width,
+        height: widget.size.height,
+        child: RepaintBoundary(key: _bKey, child: child),
+      );
+
+  void capture() {
+    WidgetsBinding.instance.addPostFrameCallback(_captureImage);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_image != null)
-      return SizedBox(
-        width: widget.size.width,
-        height: widget.size.height,
-        child: CurlEffect(
-          image: _image,
-          size: widget.size,
-        ),
-      );
+    /* show back widget if not captured already */
+    if (_backImage == null) {
+      capture();
+      return _buildWidget(widget.back);
+    }
 
-    WidgetsBinding.instance.addPostFrameCallback(_captureImage);
+    /* back widget is captured by now */
 
+    /* show front widget if not captured already */
+    if (_frontImage == null) {
+      capture();
+      return _buildWidget(widget.front);
+    }
+
+    /* both, front and back widgets are captured by now */
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
-      child: RepaintBoundary(key: _bKey, child: widget.front),
+      child: CurlEffect(
+        frontImage: _frontImage,
+        backImage: _backImage,
+        size: widget.size,
+      ),
     );
   }
 }
