@@ -4,16 +4,19 @@ import 'package:curl_page/curl_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 class CurlPage extends StatefulWidget {
   final Widget back;
   final Widget front;
   final Size size;
+  final bool vertical;
 
   CurlPage({
     @required this.back,
     @required this.front,
     @required this.size,
+    this.vertical = false,
   }) : assert(back != null && front != null && size != null);
 
   @override
@@ -43,11 +46,19 @@ class _CurlPageState extends State<CurlPage> {
       setState(() => _frontImage = image);
   }
 
-  Widget _buildWidget(Widget child) => SizedBox(
-        width: widget.size.width,
-        height: widget.size.height,
-        child: RepaintBoundary(key: _bKey, child: child),
+  Widget _buildWidget(Widget child) {
+    if (widget.vertical)
+      child = Transform.rotate(
+        angle: -math.pi / 2,
+        child: child,
       );
+
+    return SizedBox(
+      width: widget.size.width,
+      height: widget.size.height,
+      child: RepaintBoundary(key: _bKey, child: child),
+    );
+  }
 
   void capture() {
     WidgetsBinding.instance.addPostFrameCallback(_captureImage);
@@ -73,10 +84,13 @@ class _CurlPageState extends State<CurlPage> {
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
-      child: CurlEffect(
-        frontImage: _frontImage,
-        backImage: _backImage,
-        size: widget.size,
+      child: Transform.rotate(
+        angle: widget.vertical ? math.pi / 2 : 0,
+        child: CurlEffect(
+          frontImage: _frontImage,
+          backImage: _backImage,
+          size: widget.size,
+        ),
       ),
     );
   }
