@@ -1,4 +1,5 @@
 import 'package:curl_page/curl_page.dart';
+import 'package:curl_page/try_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -15,6 +16,7 @@ void main() {
 }
 
 Widget _buildChild(String text, {Color color = Colors.teal}) => Container(
+      padding: EdgeInsets.all(10.0),
       alignment: Alignment.center,
       color: color,
       child: Text(
@@ -29,11 +31,14 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.red[100],
         body: Center(
-          child: CurlPage(
-            size: Size(300, 300),
-            front: _buildChild('I am the FRONT'),
-            back: _buildChild('I am the BACK', color: Colors.blueGrey),
-          ),
+          child: false
+              ? TryScreen()
+              : CurlPage(
+                  size: Size(300, 300),
+                  front: _buildChild('I am the FRONT'),
+                  back:
+                      _buildChild('I am the BACK' * 50, color: Colors.blueGrey),
+                ),
         ),
       );
 }

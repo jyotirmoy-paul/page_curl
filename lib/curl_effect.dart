@@ -250,7 +250,7 @@ class _CurlEffectState extends State<CurlEffect> {
     // create the edge paint
     curlEdgePaint = Paint();
     curlEdgePaint.isAntiAlias = true;
-    curlEdgePaint.color = Colors.red;
+    curlEdgePaint.color = Colors.white;
     curlEdgePaint.style = PaintingStyle.fill;
 
     mUpdateRate = 1;
@@ -269,6 +269,38 @@ class _CurlEffectState extends State<CurlEffect> {
     init();
   }
 
+  Widget boundingBox({Widget child}) => SizedBox(
+        width: getWidth(),
+        height: getHeight(),
+        child: child,
+      );
+
+  double getDisplacementAngle() {
+    double displaceInX = mA.x - mF.x;
+    if (displaceInX == 149.99998333333335) displaceInX = 0;
+
+    double displaceInY = getHeight() - mF.y;
+    if (displaceInY < 0) displaceInY = 0;
+
+    double angle = math.atan(displaceInY / displaceInX);
+    if (angle.isNaN) angle = 0.0;
+
+    print("angle: $angle");
+
+    return angle;
+  }
+
+  Offset getOffset() {
+    double xOffset = mF.x;
+    double yOffset = -abs(getHeight() - mF.y);
+
+    return Offset(xOffset, yOffset);
+  }
+
+  double getAngle() {
+    return getDisplacementAngle();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -284,22 +316,80 @@ class _CurlEffectState extends State<CurlEffect> {
           TouchEvent(TouchEventType.MOVE, dud.localPosition),
         );
       },
-      child: ClipPath(
-        clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE, mF: mF),
-        clipBehavior: Clip.antiAlias,
-        child: CustomPaint(
-          painter: CurlPagePainter(
-            frontImage: widget.frontImage,
-            backImage: widget.backImage,
-            mA: mA,
-            mD: mD,
-            mE: mE,
-            mF: mF,
-            mCurlEdgePaint: curlEdgePaint,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // foreground - custom painter
+          boundingBox(
+            child: ClipPath(
+              clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE, mF: mF),
+              clipBehavior: Clip.antiAlias,
+              child: CustomPaint(
+                painter: CurlPagePainter(
+                  frontImage: widget.frontImage,
+                  backImage: widget.backImage,
+                  mA: mA,
+                  mD: mD,
+                  mE: mE,
+                  mF: mF,
+                  mCurlEdgePaint: curlEdgePaint,
+                ),
+              ),
+            ),
           ),
-        ),
+
+          // back side - widget
+          boundingBox(
+            child: ClipPath(
+              clipper: CurlBackSideClipper(mA: mA, mD: mD, mE: mE, mF: mF),
+              clipBehavior: Clip.antiAlias,
+              child: Transform.translate(
+                offset: getOffset(),
+                child: Transform.rotate(
+                  alignment: Alignment.bottomLeft,
+                  angle: getAngle(),
+                  child: CustomPaint(
+                    painter: ImagePainter(image: widget.backImage),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class CurlBackSideClipper extends CustomClipper<Path> {
+  final Vector2D mA, mD, mE, mF;
+
+  CurlBackSideClipper({
+    @required this.mA,
+    @required this.mD,
+    @required this.mE,
+    @required this.mF,
+  });
+
+  Path createCurlEdgePath() {
+    Path path = new Path();
+    path.moveTo(mA.x, mA.y);
+    path.lineTo(mD.x, math.max(0, mD.y));
+    path.lineTo(mE.x, mE.y);
+    path.lineTo(mF.x, mF.y);
+    path.lineTo(mA.x, mA.y);
+
+    return path;
+  }
+
+  @override
+  Path getClip(Size size) {
+    return createCurlEdgePath();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper oldClipper) {
+    return true;
   }
 }
 
@@ -400,10 +490,12 @@ class CurlPagePainter extends CustomPainter {
     }
 
     canvas.clipPath(path);
+    // // canvas.drawPath(path, mCurlEdgePaint);
 
-    // canvas.drawImage(backImage, Offset.zero, mCurlEdgePaint);
+    // // mCurlEdgePaint.blendMode = BlendMode.dstATop;
+    // // canvas.drawImage(backImage, Offset.zero, mCurlEdgePaint);
 
-    // canvas.drawPicture()
+    // // canvas.drawPicture()
     canvas.drawPaint(mCurlEdgePaint);
   }
 
@@ -416,5 +508,24 @@ class CurlPagePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class ImagePainter extends CustomPainter {
+  ImagePainter({
+    this.image,
+  });
+
+  final _paint = Paint();
+  final ui.Image image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawImage(image, Offset.zero, _paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }
