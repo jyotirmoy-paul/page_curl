@@ -161,7 +161,7 @@ class _CurlWidgetState extends State<CurlWidget> {
     mOldF = Vector2D(0, 0);
 
     // The movement origin point
-    mOrigin = Vector2D(this.getWidth(), 0);
+    mOrigin = Vector2D(getWidth(), 0);
   }
 
   void resetMovement() {
@@ -392,10 +392,11 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
     Path path = Path();
 
     path.moveTo(0, 0);
-    if (mE.x != size.width)
-      path.lineTo(mE.x, mE.y);
-    else
-      path.lineTo(size.width, 0);
+    // print("mE: $mE");
+    // if (mE.x != size.width)
+    // path.lineTo(mE.x, mE.y);
+    // else
+    path.lineTo(size.width, 0);
     path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mA.x, mA.y);
     path.lineTo(0, size.height);
