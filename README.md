@@ -10,17 +10,12 @@
 
 ```dart
 PageCurl(
-    vertical: true,
-    back: Image.asset(
-        'assets/cards/front.png',
-        height: heightOfCards,
-        width: widthOfCards,
+    vertical: false,
+    back: _buildContainer('This is BACK'),
+    front: _buildContainer(
+        'This is FRONT',
+        color: Colors.blueGrey,
     ),
-    front: Image.asset(
-        'assets/cards/back.png',
-        height: heightOfCards,
-        width: widthOfCards,
-    ),
-    size: Size(widthOfCards, heightOfCards),
+    size: const Size(200, 150),
     ),
 ```

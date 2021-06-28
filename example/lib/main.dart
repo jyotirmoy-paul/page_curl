@@ -27,10 +27,6 @@ class HomePage extends StatelessWidget {
         ),
       );
 
-  final double heightOfCards = 300;
-
-  double get widthOfCards => 691 * heightOfCards / 1056;
-
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.white.withAlpha(200),
@@ -43,28 +39,13 @@ class HomePage extends StatelessWidget {
             children: [
               /* horizontal */
               PageCurl(
+                vertical: false,
                 back: _buildContainer('This is BACK'),
                 front: _buildContainer(
                   'This is FRONT',
                   color: Colors.blueGrey,
                 ),
                 size: const Size(200, 150),
-              ),
-
-              /* vertical */
-              PageCurl(
-                vertical: true,
-                back: Image.asset(
-                  'assets/cards/front.png',
-                  height: heightOfCards,
-                  width: widthOfCards,
-                ),
-                front: Image.asset(
-                  'assets/cards/back.png',
-                  height: heightOfCards,
-                  width: widthOfCards,
-                ),
-                size: Size(widthOfCards, heightOfCards),
               ),
             ],
           ),
