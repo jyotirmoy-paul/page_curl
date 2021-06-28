@@ -476,7 +476,7 @@ class CurlPagePainter extends CustomPainter {
   }
 
   void drawCurlEdge(Canvas canvas) {
-    final Path path = createCurlEdgePath();
+    // final Path path = createCurlEdgePath();
 
     if (mF.x != 0.0) {
       // only draw shadow when pulled
@@ -489,14 +489,14 @@ class CurlPagePainter extends CustomPainter {
       );
     }
 
-    canvas.clipPath(path);
+    // canvas.clipPath(path);
     // // canvas.drawPath(path, mCurlEdgePaint);
 
     // // mCurlEdgePaint.blendMode = BlendMode.dstATop;
     // // canvas.drawImage(backImage, Offset.zero, mCurlEdgePaint);
 
     // // canvas.drawPicture()
-    canvas.drawPaint(mCurlEdgePaint);
+    // canvas.drawPaint(mCurlEdgePaint);
   }
 
   @override
