@@ -1,24 +1,25 @@
-import 'package:curl_page/model/touch_event.dart';
-import 'package:curl_page/model/vector_2d.dart';
 import 'package:flutter/material.dart';
+import 'package:page_curl/models/touch_event.dart';
 import 'dart:math' as math;
 
-class CurlEffect extends StatefulWidget {
+import 'package:page_curl/models/vector_2d.dart';
+
+class CurlWidget extends StatefulWidget {
   final Widget frontWidget;
   final Widget backWidget;
   final Size size;
 
-  CurlEffect({
+  CurlWidget({
     @required this.frontWidget,
     @required this.backWidget,
     @required this.size,
   });
 
   @override
-  _CurlEffectState createState() => _CurlEffectState();
+  _CurlWidgetState createState() => _CurlWidgetState();
 }
 
-class _CurlEffectState extends State<CurlEffect> {
+class _CurlWidgetState extends State<CurlWidget> {
   /* variables that controls drag and updates */
 
   /* px / draw call */

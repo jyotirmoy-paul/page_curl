@@ -1,7 +1,8 @@
-import 'package:curl_page/curl_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
+
+import 'package:page_curl/widgets/curl_widget.dart';
 
 class CurlPage extends StatefulWidget {
   final Widget back;
@@ -41,7 +42,7 @@ class _CurlPageState extends State<CurlPage> {
         height: widget.size.height,
         child: Transform.rotate(
           angle: widget.vertical ? math.pi / 2 : 0,
-          child: CurlEffect(
+          child: CurlWidget(
             frontWidget: _buildWidget(widget.front),
             backWidget: _buildWidget(widget.back, isBack: true),
             size: widget.size,
