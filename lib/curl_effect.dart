@@ -227,6 +227,10 @@ class _CurlEffectState extends State<CurlEffect> {
     }
   }
 
+  double convertRadiusToSigma(double radius) {
+    return radius * 0.57735 + 0.5;
+  }
+
   void init() {
     // init main variables
 
@@ -275,7 +279,8 @@ class _CurlEffectState extends State<CurlEffect> {
         );
       },
       child: ClipPath(
-        clipper: CurlBackgroundClipper(mA: mA, mD: mD),
+        clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE),
+        clipBehavior: Clip.antiAlias,
         child: CustomPaint(
           painter: CurlPagePainter(
             image: widget.image,
@@ -292,18 +297,22 @@ class _CurlEffectState extends State<CurlEffect> {
 }
 
 class CurlBackgroundClipper extends CustomClipper<Path> {
-  final Vector2D mA, mD;
+  final Vector2D mA, mD, mE;
 
   CurlBackgroundClipper({
     @required this.mA,
     @required this.mD,
+    @required this.mE,
   });
 
   Path createBackgroundPath(Size size) {
     Path path = Path();
 
     path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
+    if (mE.x != size.width)
+      path.lineTo(mE.x, mE.y);
+    else
+      path.lineTo(size.width, 0);
     path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mA.x, mA.y);
     path.lineTo(0, size.height);
@@ -354,8 +363,30 @@ class CurlPagePainter extends CustomPainter {
     return path;
   }
 
+  Path getShadowPath(int t) {
+    Path path = new Path();
+    path.moveTo(mA.x - t, mA.y);
+    path.lineTo(mD.x, math.max(0, mD.y - t));
+    path.lineTo(mE.x, mE.y - t);
+    path.lineTo(mF.x - t, mF.y - t);
+    path.moveTo(mA.x - t, mA.y);
+
+    return path;
+  }
+
   void drawCurlEdge(Canvas canvas) {
-    Path path = createCurlEdgePath();
+    final Path path = createCurlEdgePath();
+
+    if (mF.x != 0.0) {
+      // only draw shadow when pulled
+      final double shadowElev = 20.0;
+      canvas.drawShadow(
+        getShadowPath(shadowElev.toInt()),
+        Colors.black,
+        shadowElev,
+        true,
+      );
+    }
 
     canvas.clipPath(path);
     canvas.drawPaint(mCurlEdgePaint);
