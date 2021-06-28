@@ -274,25 +274,58 @@ class _CurlEffectState extends State<CurlEffect> {
           TouchEvent(TouchEventType.MOVE, dud.localPosition),
         );
       },
-      child: CustomPaint(
-        painter: CurlPagePainter(
-          image: widget.image,
-          mA: mA,
-          mB: mB,
-          mC: mC,
-          mD: mD,
-          mE: mE,
-          mF: mF,
-          mCurlEdgePaint: curlEdgePaint,
+      child: ClipPath(
+        clipper: CurlBackgroundClipper(mA: mA, mD: mD),
+        child: CustomPaint(
+          painter: CurlPagePainter(
+            image: widget.image,
+            mA: mA,
+            mD: mD,
+            mE: mE,
+            mF: mF,
+            mCurlEdgePaint: curlEdgePaint,
+          ),
         ),
       ),
     );
   }
 }
 
+class CurlBackgroundClipper extends CustomClipper<Path> {
+  final Vector2D mA, mD;
+
+  CurlBackgroundClipper({
+    @required this.mA,
+    @required this.mD,
+  });
+
+  Path createBackgroundPath(Size size) {
+    Path path = Path();
+
+    path.moveTo(0, 0);
+    path.lineTo(size.width, 0);
+    path.lineTo(mD.x, math.max(0, mD.y));
+    path.lineTo(mA.x, mA.y);
+    path.lineTo(0, size.height);
+    path.lineTo(0, 0);
+
+    return path;
+  }
+
+  @override
+  Path getClip(Size size) {
+    return createBackgroundPath(size);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper oldClipper) {
+    return true;
+  }
+}
+
 class CurlPagePainter extends CustomPainter {
   ui.Image image;
-  Vector2D mA, mB, mC, mD, mE, mF;
+  Vector2D mA, mD, mE, mF;
   Paint mCurlEdgePaint;
 
   final Paint _paint = Paint();
@@ -300,8 +333,6 @@ class CurlPagePainter extends CustomPainter {
   CurlPagePainter({
     @required this.image,
     @required this.mA,
-    @required this.mB,
-    @required this.mC,
     @required this.mD,
     @required this.mE,
     @required this.mF,
@@ -312,32 +343,11 @@ class CurlPagePainter extends CustomPainter {
     canvas.drawImage(image, Offset.zero, _paint);
   }
 
-  Path createBackgroundPath() {
-    Path path = new Path();
-    path.moveTo(mA.x, mA.y);
-    path.lineTo(mB.x, mB.y);
-    path.lineTo(mC.x, mC.y);
-    path.lineTo(mD.x, math.max(0, mD.y));
-    path.lineTo(mA.x, mA.y);
-
-    return path;
-  }
-
-  void drawBackground(Canvas canvas) {
-    Path mask = createBackgroundPath();
-
-    canvas.save();
-    canvas.clipPath(mask);
-    canvas.drawColor(Color(0xffff0000), BlendMode.clear);
-    canvas.restore();
-  }
-
   Path createCurlEdgePath() {
     Path path = new Path();
     path.moveTo(mA.x, mA.y);
     path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mE.x, mE.y);
-    print("mE: $mE");
     path.lineTo(mF.x, mF.y);
     path.lineTo(mA.x, mA.y);
 
@@ -354,7 +364,6 @@ class CurlPagePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     drawForeground(canvas);
-    drawBackground(canvas);
     drawCurlEdge(canvas);
   }
 
