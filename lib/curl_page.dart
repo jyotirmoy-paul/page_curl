@@ -21,10 +21,10 @@ class CurlPage extends StatefulWidget {
 }
 
 class _CurlPageState extends State<CurlPage> {
-  Widget _buildWidget(Widget child) {
+  Widget _buildWidget(Widget child, {bool isBack = false}) {
     if (widget.vertical)
       child = Transform.rotate(
-        angle: -math.pi / 2,
+        angle: isBack ? math.pi / 2 : -math.pi / 2,
         child: child,
       );
 
@@ -43,7 +43,7 @@ class _CurlPageState extends State<CurlPage> {
           angle: widget.vertical ? math.pi / 2 : 0,
           child: CurlEffect(
             frontWidget: _buildWidget(widget.front),
-            backWidget: _buildWidget(widget.back),
+            backWidget: _buildWidget(widget.back, isBack: true),
             size: widget.size,
           ),
         ),

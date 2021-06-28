@@ -31,6 +31,7 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.red[100],
         body: Center(
           child: CurlPage(
+            vertical: true,
             size: Size(300, 300),
             front: _buildChild('I am the FRONT'),
             back: _buildChild('I am the BACK' * 50, color: Colors.blueGrey),
