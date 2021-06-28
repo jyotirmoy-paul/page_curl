@@ -285,7 +285,7 @@ class _CurlEffectState extends State<CurlEffect> {
     double angle = math.atan(displaceInY / displaceInX);
     if (angle.isNaN) angle = 0.0;
 
-    print("angle: $angle");
+    if (angle < 0) angle = angle + math.pi;
 
     return angle;
   }
