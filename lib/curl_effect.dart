@@ -1,17 +1,16 @@
 import 'package:curl_page/model/touch_event.dart';
 import 'package:curl_page/model/vector_2d.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 class CurlEffect extends StatefulWidget {
-  final ui.Image frontImage;
-  final ui.Image backImage;
+  final Widget frontWidget;
+  final Widget backWidget;
   final Size size;
 
   CurlEffect({
-    @required this.frontImage,
-    @required this.backImage,
+    @required this.frontWidget,
+    @required this.backWidget,
     @required this.size,
   });
 
@@ -23,10 +22,7 @@ class _CurlEffectState extends State<CurlEffect> {
   /* variables that controls drag and updates */
 
   /* px / draw call */
-  int mCurlSpeed = 62;
-
-  /* fixed update time used to create a smooth curl animation */
-  int mUpdateRate;
+  int mCurlSpeed = 60;
 
   /* The initial offset for x and y axis movements */
   int mInitialEdgeOffset;
@@ -51,9 +47,6 @@ class _CurlEffectState extends State<CurlEffect> {
 
   /* ff false no draw call has been done */
   bool bViewDrawn;
-
-  /* defines the flip direction that is currently considered */
-  bool bFlipRight;
 
   /* if TRUE we are currently auto-flipping */
   bool bFlipping;
@@ -158,16 +151,16 @@ class _CurlEffectState extends State<CurlEffect> {
     mOldMovement.x = 0;
     mOldMovement.y = 0;
 
-    mA = new Vector2D(0, 0);
-    mB = new Vector2D(getWidth(), getHeight());
-    mC = new Vector2D(getWidth(), 0);
-    mD = new Vector2D(0, 0);
-    mE = new Vector2D(0, 0);
-    mF = new Vector2D(0, 0);
-    mOldF = new Vector2D(0, 0);
+    mA = Vector2D(0, 0);
+    mB = Vector2D(getWidth(), getHeight());
+    mC = Vector2D(getWidth(), 0);
+    mD = Vector2D(0, 0);
+    mE = Vector2D(0, 0);
+    mF = Vector2D(0, 0);
+    mOldF = Vector2D(0, 0);
 
     // The movement origin point
-    mOrigin = new Vector2D(this.getWidth(), 0);
+    mOrigin = Vector2D(this.getWidth(), 0);
   }
 
   void resetMovement() {
@@ -253,7 +246,7 @@ class _CurlEffectState extends State<CurlEffect> {
     curlEdgePaint.color = Colors.white;
     curlEdgePaint.style = PaintingStyle.fill;
 
-    mUpdateRate = 1;
+    // mUpdateRate = 1;
     mInitialEdgeOffset = 0;
 
     // other initializations
@@ -275,7 +268,7 @@ class _CurlEffectState extends State<CurlEffect> {
         child: child,
       );
 
-  double getDisplacementAngle() {
+  double getAngle() {
     double displaceInX = mA.x - mF.x;
     if (displaceInX == 149.99998333333335) displaceInX = 0;
 
@@ -297,10 +290,6 @@ class _CurlEffectState extends State<CurlEffect> {
     return Offset(xOffset, yOffset);
   }
 
-  double getAngle() {
-    return getDisplacementAngle();
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -319,21 +308,18 @@ class _CurlEffectState extends State<CurlEffect> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // foreground - custom painter
+          // foreground image + custom painter for shadow
           boundingBox(
             child: ClipPath(
               clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE, mF: mF),
               clipBehavior: Clip.antiAlias,
-              child: CustomPaint(
-                painter: CurlPagePainter(
-                  frontImage: widget.frontImage,
-                  backImage: widget.backImage,
-                  mA: mA,
-                  mD: mD,
-                  mE: mE,
-                  mF: mF,
-                  mCurlEdgePaint: curlEdgePaint,
-                ),
+              child: Stack(
+                children: [
+                  widget.frontWidget,
+                  CustomPaint(
+                    painter: CurlShadowPainter(mA: mA, mD: mD, mE: mE, mF: mF),
+                  ),
+                ],
               ),
             ),
           ),
@@ -348,9 +334,7 @@ class _CurlEffectState extends State<CurlEffect> {
                 child: Transform.rotate(
                   alignment: Alignment.bottomLeft,
                   angle: getAngle(),
-                  child: CustomPaint(
-                    painter: ImagePainter(image: widget.backImage),
-                  ),
+                  child: widget.backWidget,
                 ),
               ),
             ),
@@ -372,7 +356,7 @@ class CurlBackSideClipper extends CustomClipper<Path> {
   });
 
   Path createCurlEdgePath() {
-    Path path = new Path();
+    Path path = Path();
     path.moveTo(mA.x, mA.y);
     path.lineTo(mD.x, math.max(0, mD.y));
     path.lineTo(mE.x, mE.y);
@@ -431,56 +415,35 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
   }
 }
 
-class CurlPagePainter extends CustomPainter {
-  ui.Image frontImage;
-  ui.Image backImage;
+class CurlShadowPainter extends CustomPainter {
   Vector2D mA, mD, mE, mF;
-  Paint mCurlEdgePaint;
 
-  final Paint _paint = Paint();
-
-  CurlPagePainter({
-    @required this.frontImage,
-    @required this.backImage,
+  CurlShadowPainter({
     @required this.mA,
     @required this.mD,
     @required this.mE,
     @required this.mF,
-    @required this.mCurlEdgePaint,
   });
 
-  void drawForeground(Canvas canvas) {
-    canvas.drawImage(frontImage, Offset.zero, _paint);
-  }
-
-  Path createCurlEdgePath() {
-    Path path = new Path();
-    path.moveTo(mA.x, mA.y);
-    path.lineTo(mD.x, math.max(0, mD.y));
-    path.lineTo(mE.x, mE.y);
-    path.lineTo(mF.x, mF.y);
-    path.lineTo(mA.x, mA.y);
-
-    return path;
-  }
-
   Path getShadowPath(int t) {
-    Path path = new Path();
+    Path path = Path();
     path.moveTo(mA.x - t, mA.y);
     path.lineTo(mD.x, math.max(0, mD.y - t));
     path.lineTo(mE.x, mE.y - t);
-    path.lineTo(mF.x - t, mF.y - t);
+    if (mF.x < 0)
+      path.lineTo(-t.toDouble(), mF.y - t);
+    else
+      path.lineTo(mF.x - t, mF.y - t);
     path.moveTo(mA.x - t, mA.y);
 
     return path;
   }
 
-  void drawCurlEdge(Canvas canvas) {
-    // final Path path = createCurlEdgePath();
-
+  @override
+  void paint(Canvas canvas, Size size) {
     if (mF.x != 0.0) {
       // only draw shadow when pulled
-      final double shadowElev = 20.0;
+      final double shadowElev = 10.0;
       canvas.drawShadow(
         getShadowPath(shadowElev.toInt()),
         Colors.black,
@@ -488,44 +451,10 @@ class CurlPagePainter extends CustomPainter {
         true,
       );
     }
-
-    // canvas.clipPath(path);
-    // // canvas.drawPath(path, mCurlEdgePaint);
-
-    // // mCurlEdgePaint.blendMode = BlendMode.dstATop;
-    // // canvas.drawImage(backImage, Offset.zero, mCurlEdgePaint);
-
-    // // canvas.drawPicture()
-    // canvas.drawPaint(mCurlEdgePaint);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    drawForeground(canvas);
-    drawCurlEdge(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
-  }
-}
-
-class ImagePainter extends CustomPainter {
-  ImagePainter({
-    this.image,
-  });
-
-  final _paint = Paint();
-  final ui.Image image;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawImage(image, Offset.zero, _paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }
