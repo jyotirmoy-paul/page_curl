@@ -469,7 +469,10 @@ class CurlPagePainter extends CustomPainter {
     path.moveTo(mA.x - t, mA.y);
     path.lineTo(mD.x, math.max(0, mD.y - t));
     path.lineTo(mE.x, mE.y - t);
-    path.lineTo(mF.x - t, mF.y - t);
+    if (mF.x < 0)
+      path.lineTo(-t.toDouble(), mF.y - t);
+    else
+      path.lineTo(mF.x - t, mF.y - t);
     path.moveTo(mA.x - t, mA.y);
 
     return path;
@@ -480,7 +483,7 @@ class CurlPagePainter extends CustomPainter {
 
     if (mF.x != 0.0) {
       // only draw shadow when pulled
-      final double shadowElev = 20.0;
+      final double shadowElev = 10.0;
       canvas.drawShadow(
         getShadowPath(shadowElev.toInt()),
         Colors.black,
