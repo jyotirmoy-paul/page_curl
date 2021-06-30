@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:page_curl/clippers/curl_background_clipper.dart';
+import 'package:page_curl/clippers/curl_backside_clipper.dart';
 import 'package:page_curl/models/touch_event.dart';
 import 'dart:math' as math;
 
 import 'package:page_curl/models/vector_2d.dart';
+import 'package:page_curl/painters/curl_shadow_painter.dart';
 
 class CurlWidget extends StatefulWidget {
   final Widget frontWidget;
   final Widget backWidget;
   final Size size;
+  final bool vertical;
 
   CurlWidget({
     @required this.frontWidget,
     @required this.backWidget,
     @required this.size,
+    @required this.vertical,
   });
 
   @override
@@ -20,6 +25,8 @@ class CurlWidget extends StatefulWidget {
 }
 
 class _CurlWidgetState extends State<CurlWidget> {
+  bool get isVertical => widget.vertical;
+
   /* variables that controls drag and updates */
 
   /* px / draw call */
@@ -45,6 +52,9 @@ class _CurlWidgetState extends State<CurlWidget> {
 
   /* vector points used to define current clipping paths */
   Vector2D mA, mB, mC, mD, mE, mF, mOldF, mOrigin;
+
+  /* vectors that are corners of the entire polygon */
+  Vector2D mM, mN, mO, mP;
 
   /* ff false no draw call has been done */
   bool bViewDrawn;
@@ -230,12 +240,12 @@ class _CurlWidgetState extends State<CurlWidget> {
     }
   }
 
-  double convertRadiusToSigma(double radius) {
-    return radius * 0.57735 + 0.5;
-  }
-
   void init() {
     // init main variables
+    mM = Vector2D(0, 0);
+    mN = Vector2D(0, getHeight());
+    mO = Vector2D(getWidth(), getHeight());
+    mP = Vector2D(getWidth(), 0);
 
     mMovement = Vector2D(0, 0);
     mFinger = Vector2D(0, 0);
@@ -291,28 +301,51 @@ class _CurlWidgetState extends State<CurlWidget> {
     return Offset(xOffset, yOffset);
   }
 
+  void onDragCallback(final details) {
+    if (details is DragStartDetails) {
+      handleTouchInput(TouchEvent(TouchEventType.START, details.localPosition));
+    }
+
+    if (details is DragEndDetails) {
+      handleTouchInput(TouchEvent(TouchEventType.END, null));
+    }
+
+    if (details is DragUpdateDetails) {
+      handleTouchInput(TouchEvent(TouchEventType.MOVE, details.localPosition));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragEnd: (_) {
-        handleTouchInput(TouchEvent(TouchEventType.END, null));
-      },
-      onHorizontalDragStart: (DragStartDetails dsd) {
-        handleTouchInput(TouchEvent(TouchEventType.START, dsd.localPosition));
-      },
-      onHorizontalDragUpdate: (DragUpdateDetails dud) {
-        handleTouchInput(
-          TouchEvent(TouchEventType.MOVE, dud.localPosition),
-        );
-      },
+
+      /* drag start */
+      onVerticalDragStart: isVertical ? onDragCallback : null,
+      onHorizontalDragStart: isVertical ? null : onDragCallback,
+
+      /* drag end */
+      onVerticalDragEnd: isVertical ? onDragCallback : null,
+      onHorizontalDragEnd: isVertical ? null : onDragCallback,
+
+      /* drag update */
+      onVerticalDragUpdate: isVertical ? onDragCallback : null,
+      onHorizontalDragUpdate: isVertical ? null : onDragCallback,
       child: Stack(
         alignment: Alignment.center,
         children: [
           // foreground image + custom painter for shadow
           boundingBox(
             child: ClipPath(
-              clipper: CurlBackgroundClipper(mA: mA, mD: mD, mE: mE, mF: mF),
+              clipper: CurlBackgroundClipper(
+                mA: mA,
+                mD: mD,
+                mE: mE,
+                mF: mF,
+                mM: mM,
+                mN: mN,
+                mP: mP,
+              ),
               clipBehavior: Clip.antiAlias,
               child: Stack(
                 children: [
@@ -343,120 +376,5 @@ class _CurlWidgetState extends State<CurlWidget> {
         ],
       ),
     );
-  }
-}
-
-class CurlBackSideClipper extends CustomClipper<Path> {
-  final Vector2D mA, mD, mE, mF;
-
-  CurlBackSideClipper({
-    @required this.mA,
-    @required this.mD,
-    @required this.mE,
-    @required this.mF,
-  });
-
-  Path createCurlEdgePath() {
-    Path path = Path();
-    path.moveTo(mA.x, mA.y);
-    path.lineTo(mD.x, math.max(0, mD.y));
-    path.lineTo(mE.x, mE.y);
-    path.lineTo(mF.x, mF.y);
-    path.lineTo(mA.x, mA.y);
-
-    return path;
-  }
-
-  @override
-  Path getClip(Size size) {
-    return createCurlEdgePath();
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper oldClipper) {
-    return true;
-  }
-}
-
-class CurlBackgroundClipper extends CustomClipper<Path> {
-  final Vector2D mA, mD, mE, mF;
-
-  CurlBackgroundClipper({
-    @required this.mA,
-    @required this.mD,
-    @required this.mE,
-    @required this.mF,
-  });
-
-  Path createBackgroundPath(Size size) {
-    Path path = Path();
-
-    path.moveTo(0, 0);
-    // print("mE: $mE");
-    // if (mE.x != size.width)
-    // path.lineTo(mE.x, mE.y);
-    // else
-    path.lineTo(size.width, 0);
-    path.lineTo(mD.x, math.max(0, mD.y));
-    path.lineTo(mA.x, mA.y);
-    path.lineTo(0, size.height);
-    if (mF.x < 0) path.lineTo(mF.x, mF.y);
-    path.lineTo(0, 0);
-
-    return path;
-  }
-
-  @override
-  Path getClip(Size size) {
-    return createBackgroundPath(size);
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper oldClipper) {
-    return true;
-  }
-}
-
-class CurlShadowPainter extends CustomPainter {
-  Vector2D mA, mD, mE, mF;
-
-  CurlShadowPainter({
-    @required this.mA,
-    @required this.mD,
-    @required this.mE,
-    @required this.mF,
-  });
-
-  Path getShadowPath(int t) {
-    Path path = Path();
-    path.moveTo(mA.x - t, mA.y);
-    path.lineTo(mD.x, math.max(0, mD.y - t));
-    path.lineTo(mE.x, mE.y - t);
-    if (mF.x < 0)
-      path.lineTo(-t.toDouble(), mF.y - t);
-    else
-      path.lineTo(mF.x - t, mF.y - t);
-    path.moveTo(mA.x - t, mA.y);
-
-    return path;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (mF.x != 0.0) {
-      // only draw shadow when pulled
-      final double shadowElev = 10.0;
-      canvas.drawShadow(
-        getShadowPath(shadowElev.toInt()),
-        Colors.black,
-        shadowElev,
-        true,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }
