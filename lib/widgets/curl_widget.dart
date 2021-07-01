@@ -28,7 +28,7 @@ class CurlWidget extends StatefulWidget {
 
 class _CurlWidgetState extends State<CurlWidget> {
   bool get debugging => widget.debugging;
-  bool get isVertical => widget.vertical;
+  bool get isVertical => false;
 
   /* variables that controls drag and updates */
 
@@ -99,13 +99,13 @@ class _CurlWidgetState extends State<CurlWidget> {
   }
 
   void doPageCurl() {
-    int width = getWidth().toInt();
-    int height = getHeight().toInt();
+    int w = width.toInt();
+    int h = height.toInt();
 
     // F will follow the finger, we add a small displacement
     // So that we can see the edge
-    mF.x = width - mMovement.x + 0.1;
-    mF.y = height - mMovement.y + 0.1;
+    mF.x = w - mMovement.x + 0.1;
+    mF.y = h - mMovement.y + 0.1;
 
     // Set min points
     if (mA.x == 0) {
@@ -114,8 +114,8 @@ class _CurlWidgetState extends State<CurlWidget> {
     }
 
     // Get diffs
-    double deltaX = width - mF.x;
-    double deltaY = height - mF.y;
+    double deltaX = w - mF.x;
+    double deltaY = h - mF.y;
 
     double bh = math.sqrt(deltaX * deltaX + deltaY * deltaY) / 2;
     double tangAlpha = deltaY / deltaX;
@@ -123,12 +123,12 @@ class _CurlWidgetState extends State<CurlWidget> {
     double _cos = math.cos(alpha);
     double _sin = math.sin(alpha);
 
-    mA.x = width - (bh / _cos);
-    mA.y = height.toDouble();
+    mA.x = w - (bh / _cos);
+    mA.y = h.toDouble();
 
-    mD.x = width.toDouble();
+    mD.x = w.toDouble();
     // bound mD.y
-    mD.y = math.min(height - (bh / _sin), getHeight());
+    mD.y = math.min(h - (bh / _sin), height);
 
     mA.x = math.max(0, mA.x);
     if (mA.x == 0) {
@@ -142,21 +142,23 @@ class _CurlWidgetState extends State<CurlWidget> {
 
     // bouding corrections
     if (mD.y < 0) {
-      mD.x = width + tangAlpha * mD.y;
+      mD.x = w + tangAlpha * mD.y;
 
-      mE.x = width + math.tan(2 * alpha) * mD.y;
+      mE.x = w + math.tan(2 * alpha) * mD.y;
 
       // modify mD to create newmD by cleaning y value
       Vector2D newmD = Vector2D(mD.x, 0);
-      double l = width - newmD.x;
+      double l = w - newmD.x;
 
       mE.y = -math.sqrt(abs(math.pow(l, 2) - math.pow((newmD.x - mE.x), 2)));
     }
   }
 
-  double getWidth() => widget.size.width;
+  double get aspectRatio => width / height;
 
-  double getHeight() => widget.size.height;
+  double get width => widget.size.width;
+
+  double get height => widget.size.height;
 
   void resetClipEdge() {
     // set base movement
@@ -166,15 +168,15 @@ class _CurlWidgetState extends State<CurlWidget> {
     mOldMovement.y = 0;
 
     mA = Vector2D(0, 0);
-    mB = Vector2D(getWidth(), getHeight());
-    mC = Vector2D(getWidth(), 0);
+    mB = Vector2D(width, height);
+    mC = Vector2D(width, 0);
     mD = Vector2D(0, 0);
     mE = Vector2D(0, 0);
     mF = Vector2D(0, 0);
     mOldF = Vector2D(0, 0);
 
     // The movement origin point
-    mOrigin = Vector2D(getWidth(), 0);
+    mOrigin = Vector2D(width, 0);
   }
 
   void resetMovement() {
@@ -246,9 +248,9 @@ class _CurlWidgetState extends State<CurlWidget> {
   void init() {
     // init main variables
     mM = Vector2D(0, 0);
-    mN = Vector2D(0, getHeight());
-    mO = Vector2D(getWidth(), getHeight());
-    mP = Vector2D(getWidth(), 0);
+    mN = Vector2D(0, height);
+    mO = Vector2D(width, height);
+    mP = Vector2D(width, 0);
 
     mMovement = Vector2D(0, 0);
     mFinger = Vector2D(0, 0);
@@ -264,7 +266,7 @@ class _CurlWidgetState extends State<CurlWidget> {
     mInitialEdgeOffset = 0;
 
     // other initializations
-    mFlipRadius = getWidth();
+    mFlipRadius = width;
 
     resetClipEdge();
     doPageCurl();
@@ -276,17 +278,13 @@ class _CurlWidgetState extends State<CurlWidget> {
     init();
   }
 
-  Widget boundingBox({Widget child}) => SizedBox(
-        width: getWidth(),
-        height: getHeight(),
-        child: child,
-      );
+  Widget boundingBox({Widget child}) => child;
 
   double getAngle() {
     double displaceInX = mA.x - mF.x;
     if (displaceInX == 149.99998333333335) displaceInX = 0;
 
-    double displaceInY = getHeight() - mF.y;
+    double displaceInY = height - mF.y;
     if (displaceInY < 0) displaceInY = 0;
 
     double angle = math.atan(displaceInY / displaceInX);
@@ -299,7 +297,7 @@ class _CurlWidgetState extends State<CurlWidget> {
 
   Offset getOffset() {
     double xOffset = mF.x;
-    double yOffset = -abs(getHeight() - mF.y);
+    double yOffset = -abs(height - mF.y);
 
     return Offset(xOffset, yOffset);
   }
@@ -318,30 +316,62 @@ class _CurlWidgetState extends State<CurlWidget> {
     }
   }
 
-  Widget _buildPoint(Vector2D p, String name) => Positioned(
-        left: p.x,
-        top: p.y,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black,
-            shape: BoxShape.circle,
-          ),
-          padding: const EdgeInsets.all(5.0),
-          child: Text(name, style: TextStyle(fontSize: 15.0)),
-        ),
-      );
+  // Widget _buildPoint(Vector2D p, String name) => Positioned(
+  //       left: p.x,
+  //       top: p.y,
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //           color: Colors.black,
+  //           shape: BoxShape.circle,
+  //         ),
+  //         padding: const EdgeInsets.all(5.0),
+  //         child: Text(name, style: TextStyle(fontSize: 15.0)),
+  //       ),
+  //     );
 
-  List<Widget> _buildDebugWidgets() {
-    if (debugging == false) return [];
+  // List<Widget> _buildDebugWidgets() {
+  //   if (debugging == false) return [];
 
-    return [
-      _buildPoint(mA, 'A'),
-      _buildPoint(mB, 'B'),
-      _buildPoint(mC, 'C'),
-      _buildPoint(mD, 'D'),
-      _buildPoint(mE, 'E'),
-      _buildPoint(mF, 'F'),
-    ];
+  //   return [
+  //     _buildPoint(mA, 'A'),
+  //     _buildPoint(mB, 'B'),
+  //     _buildPoint(mC, 'C'),
+  //     _buildPoint(mD, 'D'),
+  //     _buildPoint(mE, 'E'),
+  //     _buildPoint(mF, 'F'),
+  //   ];
+  // }
+
+  double getRatio(double a, double x) => a * x + 1;
+
+  Matrix4 getScaleMatrix() {
+    double dy = abs(height - mF.y);
+    double pertDy = dy / height;
+
+    double dx = abs(width - mF.x);
+    double pertDx = dx / width;
+
+    print('pertDx: $pertDx');
+
+    /*
+    transform: Matrix4.diagonal3Values(
+              1.0 / aspectRatio,
+              aspectRatio,
+              1.0,
+            ),
+    */
+
+    // return Matrix4.diagonal3Values(
+    //   getRatio(aspectRatio, pertDx),
+    //   getRatio(1 / aspectRatio, pertDy),
+    //   1.0,
+    // );
+
+    return Matrix4.diagonal3Values(
+      1.0,
+      1.0,
+      1.0,
+    );
   }
 
   @override
@@ -361,42 +391,41 @@ class _CurlWidgetState extends State<CurlWidget> {
       onVerticalDragUpdate: isVertical ? onDragCallback : null,
       onHorizontalDragUpdate: isVertical ? null : onDragCallback,
       child: Stack(
-        alignment: Alignment.center,
         children: [
           // foreground image + custom painter for shadow
-          boundingBox(
-            child: ClipPath(
-              clipper: CurlBackgroundClipper(
-                mA: mA,
-                mD: mD,
-                mE: mE,
-                mF: mF,
-                mM: mM,
-                mN: mN,
-                mP: mP,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                children: [
-                  widget.frontWidget,
-                  CustomPaint(
-                    painter: CurlShadowPainter(mA: mA, mD: mD, mE: mE, mF: mF),
-                  ),
-                ],
-              ),
+          ClipPath(
+            clipper: CurlBackgroundClipper(
+              mA: mA,
+              mD: mD,
+              mE: mE,
+              mF: mF,
+              mM: mM,
+              mN: mN,
+              mP: mP,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              children: [
+                widget.frontWidget,
+                CustomPaint(
+                  painter: CurlShadowPainter(mA: mA, mD: mD, mE: mE, mF: mF),
+                ),
+              ],
             ),
           ),
 
           // back side - widget
-          boundingBox(
-            child: ClipPath(
-              clipper: CurlBackSideClipper(mA: mA, mD: mD, mE: mE, mF: mF),
-              clipBehavior: Clip.antiAlias,
-              child: Transform.translate(
-                offset: getOffset(),
-                child: Transform.rotate(
-                  alignment: Alignment.bottomLeft,
-                  angle: getAngle(),
+          ClipPath(
+            clipper: CurlBackSideClipper(mA: mA, mD: mD, mE: mE, mF: mF),
+            clipBehavior: Clip.antiAlias,
+            child: Transform.translate(
+              offset: getOffset(),
+              child: Transform.rotate(
+                alignment: Alignment.bottomLeft,
+                angle: getAngle(),
+                child: Transform(
+                  transform: getScaleMatrix(),
+                  alignment: Alignment.center,
                   child: widget.backWidget,
                 ),
               ),
@@ -404,7 +433,7 @@ class _CurlWidgetState extends State<CurlWidget> {
           ),
 
           /* build debug widgets */
-          ..._buildDebugWidgets(),
+          // ..._buildDebugWidgets(),
         ],
       ),
     );
