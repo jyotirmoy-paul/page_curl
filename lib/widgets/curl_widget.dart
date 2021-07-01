@@ -12,12 +12,14 @@ class CurlWidget extends StatefulWidget {
   final Widget backWidget;
   final Size size;
   final bool vertical;
+  final bool debugging;
 
   CurlWidget({
     @required this.frontWidget,
     @required this.backWidget,
     @required this.size,
     @required this.vertical,
+    this.debugging = false,
   });
 
   @override
@@ -25,6 +27,7 @@ class CurlWidget extends StatefulWidget {
 }
 
 class _CurlWidgetState extends State<CurlWidget> {
+  bool get debugging => widget.debugging;
   bool get isVertical => widget.vertical;
 
   /* variables that controls drag and updates */
@@ -315,6 +318,32 @@ class _CurlWidgetState extends State<CurlWidget> {
     }
   }
 
+  Widget _buildPoint(Vector2D p, String name) => Positioned(
+        left: p.x,
+        top: p.y,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            shape: BoxShape.circle,
+          ),
+          padding: const EdgeInsets.all(5.0),
+          child: Text(name, style: TextStyle(fontSize: 15.0)),
+        ),
+      );
+
+  List<Widget> _buildDebugWidgets() {
+    if (debugging == false) return [];
+
+    return [
+      _buildPoint(mA, 'A'),
+      _buildPoint(mB, 'B'),
+      _buildPoint(mC, 'C'),
+      _buildPoint(mD, 'D'),
+      _buildPoint(mE, 'E'),
+      _buildPoint(mF, 'F'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -373,6 +402,9 @@ class _CurlWidgetState extends State<CurlWidget> {
               ),
             ),
           ),
+
+          /* build debug widgets */
+          ..._buildDebugWidgets(),
         ],
       ),
     );

@@ -8,6 +8,7 @@ class PageCurl extends StatefulWidget {
   final Widget front;
   final Size size;
   final bool vertical;
+  final bool debugging;
 
   PageCurl({
     Key key,
@@ -15,6 +16,7 @@ class PageCurl extends StatefulWidget {
     @required this.front,
     @required this.size,
     this.vertical = false,
+    this.debugging = false,
   }) : super(key: key) {
     assert(back != null && front != null && size != null);
   }
@@ -24,6 +26,8 @@ class PageCurl extends StatefulWidget {
 }
 
 class _PageCurlState extends State<PageCurl> {
+  bool get debugging => widget.debugging ?? false;
+
   double get width => widget.size.width;
   double get height => widget.size.height;
 
@@ -35,13 +39,14 @@ class _PageCurlState extends State<PageCurl> {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: width,
-        height: height,
+        width: width * (debugging ? 1.2 : 1.0),
+        height: height * (debugging ? 1.8 : 1.0),
         child: CurlWidget(
           frontWidget: _buildWidget(widget.front),
           backWidget: _buildWidget(widget.back),
           size: widget.size,
           vertical: widget.vertical ?? false,
+          debugging: debugging,
         ),
       );
 }
