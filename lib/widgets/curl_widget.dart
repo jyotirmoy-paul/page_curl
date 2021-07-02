@@ -345,13 +345,13 @@ class _CurlWidgetState extends State<CurlWidget> {
   double getRatio(double a, double x) => a * x + 1;
 
   Matrix4 getScaleMatrix() {
-    double dy = abs(height - mF.y);
-    double pertDy = dy / height;
+    // double dy = abs(height - mF.y);
+    // double pertDy = dy / height;
 
-    double dx = abs(width - mF.x);
-    double pertDx = dx / width;
+    // double dx = abs(width - mF.x);
+    // double pertDx = dx / width;
 
-    print('pertDx: $pertDx');
+    // print('pertDx: $pertDx');
 
     /*
     transform: Matrix4.diagonal3Values(
@@ -362,8 +362,8 @@ class _CurlWidgetState extends State<CurlWidget> {
     */
 
     // return Matrix4.diagonal3Values(
-    //   getRatio(aspectRatio, pertDx),
-    //   getRatio(1 / aspectRatio, pertDy),
+    //   getRatio(aspectRatio, pertDx / pertDy),
+    //   getRatio(1 / aspectRatio, pertDx / pertDy),
     //   1.0,
     // );
 
@@ -415,17 +415,17 @@ class _CurlWidgetState extends State<CurlWidget> {
           ),
 
           // back side - widget
-          ClipPath(
-            clipper: CurlBackSideClipper(mA: mA, mD: mD, mE: mE, mF: mF),
-            clipBehavior: Clip.antiAlias,
-            child: Transform.translate(
-              offset: getOffset(),
-              child: Transform.rotate(
-                alignment: Alignment.bottomLeft,
-                angle: getAngle(),
-                child: Transform(
-                  transform: getScaleMatrix(),
-                  alignment: Alignment.center,
+          Transform(
+            transform: getScaleMatrix(),
+            alignment: Alignment.center,
+            child: ClipPath(
+              clipper: CurlBackSideClipper(mA: mA, mD: mD, mE: mE, mF: mF),
+              clipBehavior: Clip.antiAlias,
+              child: Transform.translate(
+                offset: getOffset(),
+                child: Transform.rotate(
+                  alignment: Alignment.bottomLeft,
+                  angle: getAngle(),
                   child: widget.backWidget,
                 ),
               ),
