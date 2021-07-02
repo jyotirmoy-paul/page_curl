@@ -10,12 +10,12 @@ Curl your pages - Page Curl adds curling effects to your widgets.
 ## Example
 
 ```dart
-PageCurl(
+ PageCurl(
     vertical: false,
     back: _buildContainer('This is BACK'),
     front: _buildContainer(
-        'This is FRONT',
-        color: Colors.blueGrey,
+      'This is FRONT',
+      color: Colors.blueGrey,
     ),
     size: const Size(200, 150),
     ),
