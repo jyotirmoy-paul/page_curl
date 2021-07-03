@@ -5,7 +5,7 @@ Curl your pages - Page Curl adds curling effects to your widgets.
 
 ## Demo
 
-![demo](https://raw.githubusercontent.com/jyotirmoy-paul/page_curl/master/demo.gif)
+<img src="https://raw.githubusercontent.com/jyotirmoy-paul/page_curl/master/demo.gif" width="320">
 
 ## Example
 
