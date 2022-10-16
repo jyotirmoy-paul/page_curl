@@ -1,6 +1,6 @@
 name: page_curl
 description: Add a curling effect to any widgets
-version: 0.0.1
+version: 0.0.2
 authors:
   - Jyotirmoy Paul <mr.jyotirmoy.paul@gmail.com>
 homepage: https://github.com/jyotirmoy-paul/page_curl
