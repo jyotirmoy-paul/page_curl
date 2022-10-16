@@ -13,13 +13,13 @@ class PageCurl extends StatefulWidget {
   final bool debugging;
 
   PageCurl({
-    Key key,
-    @required this.back,
-    @required this.front,
-    @required this.size,
+    super.key,
+    required this.back,
+    required this.front,
+    required this.size,
     this.vertical = false,
     this.debugging = false,
-  }) : super(key: key) {
+  }) {
     assert(back != null && front != null && size != null);
   }
 

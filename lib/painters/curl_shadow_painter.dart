@@ -6,10 +6,10 @@ class CurlShadowPainter extends CustomPainter {
   Vector2D mA, mD, mE, mF;
 
   CurlShadowPainter({
-    @required this.mA,
-    @required this.mD,
-    @required this.mE,
-    @required this.mF,
+    required this.mA,
+    required this.mD,
+    required this.mE,
+    required this.mF,
   });
 
   Path getShadowPath(int t) {

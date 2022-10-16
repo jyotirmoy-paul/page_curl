@@ -6,13 +6,13 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
   final Vector2D mA, mD, mE, mF, mM, mN, mP;
 
   CurlBackgroundClipper({
-    @required this.mA,
-    @required this.mD,
-    @required this.mE,
-    @required this.mF,
-    @required this.mM,
-    @required this.mN,
-    @required this.mP,
+    required this.mA,
+    required this.mD,
+    required this.mE,
+    required this.mF,
+    required this.mM,
+    required this.mN,
+    required this.mP,
   });
 
   Path createBackgroundPath() {
