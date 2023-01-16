@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'package:page_curl/widgets/curl_widget.dart';
 
@@ -20,7 +19,6 @@ class PageCurl extends StatefulWidget {
     this.vertical = false,
     this.debugging = false,
   }) {
-    assert(back != null && front != null && size != null);
   }
 
   @override
