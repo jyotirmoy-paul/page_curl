@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:page_curl/models/vector_2d.dart';
 
@@ -35,7 +36,7 @@ class CurlBackgroundClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper oldClipper) {
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return true;
   }
 }

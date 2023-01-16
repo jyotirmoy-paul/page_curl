@@ -4,6 +4,8 @@ import 'package:page_curl/page_curl.dart';
 void main() => runApp(App());
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -11,19 +13,21 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   Widget _buildContainer(String text, {Color color = Colors.teal}) => Container(
         alignment: Alignment.center,
         color: color,
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       );
 
@@ -31,7 +35,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.white.withAlpha(200),
         appBar: AppBar(
-          title: Text('Curling a page... virtually'),
+          title: const Text('Curling a page... virtually'),
         ),
         body: Center(
           child: Column(

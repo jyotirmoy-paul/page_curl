@@ -1,9 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:page_curl/clippers/curl_background_clipper.dart';
 import 'package:page_curl/clippers/curl_backside_clipper.dart';
 import 'package:page_curl/models/touch_event.dart';
-import 'dart:math' as math;
-
 import 'package:page_curl/models/vector_2d.dart';
 import 'package:page_curl/painters/curl_shadow_painter.dart';
 
@@ -88,9 +88,9 @@ class _CurlWidgetState extends State<CurlWidget> {
       } else {
         // change direction
         if (point.x > (mOrigin.x + mFlipRadius))
-          point.x = (mOrigin.x + mFlipRadius);
+          point.x = mOrigin.x + mFlipRadius;
         else if (point.x < (mOrigin.x - mFlipRadius))
-          point.x = (mOrigin.x - mFlipRadius);
+          point.x = mOrigin.x - mFlipRadius;
         point.y = math.sin(math.acos(abs(point.x - mOrigin.x) / mFlipRadius)) *
             mFlipRadius;
       }
@@ -151,7 +151,7 @@ class _CurlWidgetState extends State<CurlWidget> {
       double l = w - newmD.x;
 
       mE.y = -math.sqrt(abs(math.pow(l, 2).toDouble() -
-          math.pow((newmD.x - mE.x), 2).toDouble()));
+          math.pow(newmD.x - mE.x, 2).toDouble()));
     }
   }
 
