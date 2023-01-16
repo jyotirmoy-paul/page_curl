@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
 import 'package:page_curl/widgets/curl_widget.dart';
 
 class PageCurl extends StatefulWidget {
@@ -18,15 +17,14 @@ class PageCurl extends StatefulWidget {
     required this.size,
     this.vertical = false,
     this.debugging = false,
-  }) {
-  }
+  }) {}
 
   @override
   _PageCurlState createState() => _PageCurlState();
 }
 
 class _PageCurlState extends State<PageCurl> {
-  bool get debugging => widget.debugging ?? false;
+  bool get debugging => widget.debugging;
 
   double get width => widget.size.width;
   double get height => widget.size.height;
@@ -67,7 +65,7 @@ class _PageCurlState extends State<PageCurl> {
               frontWidget: _buildWidget(widget.front),
               backWidget: _buildWidget(widget.back),
               size: widget.size,
-              vertical: widget.vertical ?? false,
+              vertical: widget.vertical,
               debugging: debugging,
             ),
           ),

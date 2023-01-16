@@ -4,6 +4,8 @@ import 'package:page_curl/page_curl.dart';
 void main() => runApp(App());
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
